@@ -16,14 +16,17 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useUser } from "@/context/UserContext";
 import { logOutUser } from "@/services/authService";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { user, setIsLoading, setUser } = useUser();
+  const router = useRouter();
 
   const handleLogout = () => {
     logOutUser();
     setUser(null);
     setIsLoading(true);
+    router.push("/");
   };
 
   return (

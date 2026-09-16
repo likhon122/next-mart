@@ -8,20 +8,26 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import ImagePreviewer from "./ImagePreviewer";
+import { createShop } from "@/services/shop";
+import { toast } from "sonner";
 
 const CreateShopForm = () => {
   const [imageFiles, setImageFiles] = useState<File[] | []>([]);
   const [imagePreviews, setImagePreviews] = useState<string[] | []>([]);
   const form = useForm();
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const {
+    formState: { isSubmitting },
+  } = form;
+
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const servicesOffered = data?.servicesOffered
       ?.split(",")
       .map((service: string) => service.trim())
@@ -30,10 +36,29 @@ const CreateShopForm = () => {
     const modifiedData = {
       ...data,
       servicesOffered,
-      establishedYear: Number(data?.establishedYear)
+      establishedYear: Number(data?.establishedYear),
     };
+    try {
+      const formData = new FormData();
+      const imageFile = imageFiles[0]; // Get the first image file from the array
+      formData.append("data", JSON.stringify(modifiedData));
+      formData.append("logo", imageFile);
 
-    console.log(modifiedData);
+      const response = await createShop(formData);
+
+      console.log(response);
+
+      if (response?.success) {
+        toast.success("Shop created successfully!");
+      } else {
+        toast.error(
+          response?.message || "Failed to create shop. Please try again.",
+        );
+      }
+    } catch (error) {
+      toast.error("Failed to create shop. Please try again.");
+      console.log(error);
+    }
   };
   return (
     <div className="border-2 border-gray-300 rounded-xl grow  p-5 my-5">
@@ -222,8 +247,7 @@ const CreateShopForm = () => {
           </div>
 
           <Button type="submit" className="mt-5 w-full">
-            {/* {isSubmitting ? "Creating...." : "Create"} */}
-            Create
+            {isSubmitting ? "Creating...." : "Create"}
           </Button>
         </form>
       </Form>

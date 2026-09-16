@@ -9,7 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,14 +20,20 @@ import { toast } from "sonner";
 import { loginUser, verifyRecaptcha } from "@/services/authService";
 import { recaptchaClientKey } from "@/app/config";
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 
 const LoginForm = () => {
   const form = useForm({
-    resolver: zodResolver(loginValidationSchema)
+    resolver: zodResolver(loginValidationSchema),
   });
 
   const [recaptchaValue, setRecaptchaValue] = useState(false);
   const { isSubmitting } = form.formState;
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirectPath");
+  const router = useRouter();
+  const { setIsLoading } = useUser();
 
   const handleRecaptcha = async (value: string | null) => {
     if (value) {
@@ -43,6 +49,12 @@ const LoginForm = () => {
       const response = await loginUser(data);
       if (response.success) {
         toast.success(response.message || "Login successful");
+        setIsLoading(true);
+        if (redirectPath) {
+          router.push(redirectPath);
+        } else {
+          router.push("/profile");
+        }
       } else {
         toast.error(response.message || "Login failed. Please try again.");
       }

@@ -2,6 +2,7 @@
 "use server";
 
 import { publicBaseUrl, recaptchaServerKey } from "@/app/config";
+import { IUser } from "@/types";
 import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 import { FieldValues } from "react-hook-form";
@@ -11,9 +12,9 @@ const registerUser = async (data: FieldValues) => {
     const response = await fetch(`${publicBaseUrl}/user`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     return response.json();
   } catch (error: any) {
@@ -26,9 +27,9 @@ const loginUser = async (data: FieldValues) => {
     const response = await fetch(`${publicBaseUrl}/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
 
     const responseData = await response.json();
@@ -43,15 +44,13 @@ const loginUser = async (data: FieldValues) => {
 };
 
 const getUserInfo = async () => {
-  try {
-    const cookieData = (await cookies()).get("accessToken")?.value;
-    if (cookieData) {
-      // Use jwt-decode to decode the token and extract user information
-      return jwtDecode(cookieData);
-    }
-    return null; // Return null if no token is found
-  } catch (error: any) {
-    return Error(error);
+  const cookieData = (await cookies()).get("accessToken")?.value;
+  let decodedData = null;
+  if (cookieData) {
+    decodedData = await jwtDecode<IUser>(cookieData);
+    return decodedData;
+  } else {
+    return null;
   }
 };
 
@@ -62,13 +61,13 @@ const verifyRecaptcha = async (token: string) => {
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
           secret: recaptchaServerKey,
-          response: token
-        })
-      }
+          response: token,
+        }),
+      },
     );
     return response.json();
   } catch (error: any) {

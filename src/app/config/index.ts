@@ -7,4 +7,6 @@ const recaptchaClientKey =
 const recaptchaServerKey =
   process.env.NEXT_PUBLIC_RECAPTCHA_SERVER_KEY || "your-default-server-key";
 
-export { publicBaseUrl, recaptchaClientKey, recaptchaServerKey };
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+export { publicBaseUrl, recaptchaClientKey, recaptchaServerKey, appUrl };
