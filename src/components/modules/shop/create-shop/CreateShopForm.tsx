@@ -1,5 +1,4 @@
 "use client";
-import Logo from "@/app/assets/svgs/logo";
 import { Button } from "@/components/ui/button";
 import ImageUploader from "@/components/ui/core/imageUploader";
 import {
@@ -17,6 +16,7 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import ImagePreviewer from "./ImagePreviewer";
 import { createShop } from "@/services/shop";
 import { toast } from "sonner";
+import Logo from "@/assets/svgs/logo";
 
 const CreateShopForm = () => {
   const [imageFiles, setImageFiles] = useState<File[] | []>([]);

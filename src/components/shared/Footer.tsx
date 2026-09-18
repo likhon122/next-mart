@@ -1,4 +1,4 @@
-import Logo from "@/app/assets/svgs/logo";
+import Logo from "@/assets/svgs/logo";
 import { X } from "lucide-react";
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ const Footer = () => {
     { href: "/about", label: "About Us" },
     { href: "/testimonial", label: "Testimonial" },
     { href: "/blogs", label: "Blogs" },
-    { href: "/contact", label: "Contact Us" }
+    { href: "/contact", label: "Contact Us" },
   ];
 
   const socialLinks = [{ href: "#", icon: X }];

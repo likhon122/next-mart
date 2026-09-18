@@ -1,26 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { RTable, DataTableFeatures } from "@/components/ui/core/table";
-import { CreateCategoryModal } from "./CreateCategoryModal";
 import { ColumnDef } from "@tanstack/react-table";
-import { ICategory } from "@/types/category";
 import { Trash } from "lucide-react";
 import Image from "next/image";
-import DeleteConfirmationModal from "@/components/ui/core/modal/DeleteConfirmationModal";
 import { useState } from "react";
-import { deleteCategory } from "@/services/category";
+import CreateBrandModal from "./CreateBrandModal";
 import { toast } from "sonner";
+import { deleteBrand } from "@/services/Brand";
+import { IBrand } from "@/types/brand";
+import { RTable, DataTableFeatures } from "@/components/ui/core/table";
+import DeleteConfirmationModal from "@/components/ui/core/modal/DeleteConfirmationModal";
 
-type TCategoriesProps = {
-  categories: ICategory[];
-};
-
-const ManageCategories = ({ categories }: TCategoriesProps) => {
+const ManageBrands = ({ brands }: { brands: IBrand[] }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
-  const handleDelete = (data: ICategory) => {
+  const handleDelete = (data: IBrand) => {
+    console.log(data);
     setSelectedId(data?._id);
     setSelectedItem(data?.name);
     setModalOpen(true);
@@ -29,7 +26,7 @@ const ManageCategories = ({ categories }: TCategoriesProps) => {
   const handleDeleteConfirm = async () => {
     try {
       if (selectedId) {
-        const res = await deleteCategory(selectedId);
+        const res = await deleteBrand(selectedId);
         console.log(res);
         if (res.success) {
           toast.success(res.message);
@@ -39,19 +36,18 @@ const ManageCategories = ({ categories }: TCategoriesProps) => {
         }
       }
     } catch (err: any) {
-      toast.error(err?.message);
       console.error(err?.message);
     }
   };
 
-  const columns: ColumnDef<DataTableFeatures, ICategory>[] = [
+  const columns: ColumnDef<DataTableFeatures, IBrand>[] = [
     {
       accessorKey: "name",
-      header: () => <div>Category Name</div>,
+      header: () => <div>Brand Name</div>,
       cell: ({ row }) => (
         <div className="flex items-center space-x-3">
           <Image
-            src={row.original.icon}
+            src={row.original.logo}
             alt={row.original.name}
             width={40}
             height={40}
@@ -92,23 +88,24 @@ const ManageCategories = ({ categories }: TCategoriesProps) => {
       ),
     },
   ];
+
   return (
-    <>
-      <div>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Manage Categories</h1>
-          <CreateCategoryModal />
-        </div>
-        <RTable data={categories} columns={columns} />
-        <DeleteConfirmationModal
-          name={selectedItem}
-          isOpen={isModalOpen}
-          onOpenChange={setModalOpen}
-          onConfirm={handleDeleteConfirm}
-        />
+    <div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Manage Brands</h1>
+
+        <CreateBrandModal />
       </div>
-    </>
+      <RTable columns={columns} data={brands || []} />
+
+      <DeleteConfirmationModal
+        name={selectedItem}
+        isOpen={isModalOpen}
+        onOpenChange={setModalOpen}
+        onConfirm={handleDeleteConfirm}
+      />
+    </div>
   );
 };
 
-export default ManageCategories;
+export default ManageBrands;
