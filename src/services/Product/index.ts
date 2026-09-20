@@ -5,13 +5,16 @@ import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 // get all products
-export const getAllProducts = async (page?: string) => {
+export const getAllProducts = async (page?: string, limit?: string) => {
   try {
-    const res = await fetch(`${publicBaseUrl}/product?page=${page}`, {
-      next: {
-        tags: ["PRODUCT"],
+    const res = await fetch(
+      `${publicBaseUrl}/product?limit=${limit}&page=${page}`,
+      {
+        next: {
+          tags: ["PRODUCT"],
+        },
       },
-    });
+    );
     const data = await res.json();
     return data;
   } catch (error: any) {

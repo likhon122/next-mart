@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "../ui/button";
 import { Heart, LogOut, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,32 +11,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
+import { usePathname, useRouter } from "next/navigation";
 import { logOutUser } from "@/services/authService";
-import { useRouter } from "next/navigation";
+import { protectedRoutes } from "@/constants";
 import Logo from "@/assets/svgs/logo";
 
 export default function Navbar() {
-  const { user, setIsLoading, setUser } = useUser();
+  const { user, setIsLoading } = useUser();
+  const pathname = usePathname();
   const router = useRouter();
 
-  const handleLogout = () => {
+  const handleLogOut = () => {
     logOutUser();
-    setUser(null);
     setIsLoading(true);
-    router.push("/");
+    if (protectedRoutes.some((route) => pathname.match(route))) {
+      router.push("/");
+    }
   };
 
   return (
-    <header className="border-b w-full">
-      <div className="container flex justify-between items-center mx-auto h-16 px-3">
-        <h1 className="text-2xl font-black flex items-center">
-          <Logo />
-          Next Mart
-        </h1>
+    <header className="border-b bg-background w-full sticky top-0 z-10">
+      <div className="container flex justify-between items-center mx-auto h-16 px-5">
+        <Link href="/">
+          <h1 className="text-2xl font-black flex items-center">
+            <Logo /> Next Mart
+          </h1>
+        </Link>
         <div className="max-w-md  grow">
           <input
             type="text"
@@ -47,55 +50,55 @@ export default function Navbar() {
           <Button variant="outline" className="rounded-full p-0 size-10">
             <Heart />
           </Button>
-          <Button variant="outline" className="rounded-full p-0 size-10">
-            <ShoppingBag />
-          </Button>
-          {!user ? (
-            <Link href="/login">
-              <Button
-                variant="outline"
-                className="rounded-full p-4 cursor-pointer"
-              >
-                Login
-              </Button>
-            </Link>
-          ) : (
+          <Link href="/cart">
+            <Button
+              variant="outline"
+              className="rounded-full p-0 size-10 cursor-pointer"
+            >
+              <ShoppingBag />
+            </Button>
+          </Link>
+
+          {user?.email ? (
             <>
               <Link href="/create-shop">
-                <Button
-                  variant="outline"
-                  className="rounded-full p-4 cursor-pointer"
-                >
-                  Create Shop
-                </Button>
+                <Button className="rounded-full">Create Shop</Button>
               </Link>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className="cursor-pointer">
+                <DropdownMenuTrigger>
                   <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>User</AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuGroup>
+                <DropdownMenuGroup>
+                  <DropdownMenuContent>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href={`/${user?.role}/dashboard`}>Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>My Shop</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="text-red-500 cursor-pointer"
-                      onClick={handleLogout}
+                      className="bg-red-500 cursor-pointer"
+                      onClick={handleLogOut}
                     >
                       <LogOut />
-                      <span>Logout</span>
+                      <span>Log Out</span>
                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
+                  </DropdownMenuContent>
+                </DropdownMenuGroup>
               </DropdownMenu>
             </>
+          ) : (
+            <Link href="/login">
+              <Button className="rounded-full" variant="outline">
+                Login
+              </Button>
+            </Link>
           )}
         </nav>
       </div>

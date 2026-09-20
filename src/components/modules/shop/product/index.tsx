@@ -7,8 +7,20 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { IProduct } from "@/types/product";
 import { RTable, type DataTableFeatures } from "@/components/ui/core/table";
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import DiscountModal from "./DiscountModal";
+import TablePagination from "@/components/ui/core/table/TablePagination";
+import { IMeta } from "@/types/meta";
 
-const ManageProducts = ({ products }: { products: IProduct[] }) => {
+const ManageProducts = ({
+  products,
+  meta,
+}: {
+  products: IProduct[];
+  meta: IMeta;
+}) => {
+  const [selectedIds, setSelectedIds] = useState<string[] | []>([]);
   const router = useRouter();
 
   const handleView = (product: IProduct) => {
@@ -20,6 +32,36 @@ const ManageProducts = ({ products }: { products: IProduct[] }) => {
   };
 
   const columns: ColumnDef<DataTableFeatures, IProduct>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => {
+            if (value) {
+              setSelectedIds((prev) => [...prev, row.original._id]);
+            } else {
+              setSelectedIds(
+                selectedIds.filter((id) => id !== row.original._id),
+              );
+            }
+            row.toggleSelected(!!value);
+          }}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+
     {
       accessorKey: "name",
       header: "Product Name",
@@ -113,9 +155,14 @@ const ManageProducts = ({ products }: { products: IProduct[] }) => {
           >
             Add Product <Plus />
           </Button>
+          <DiscountModal
+            selectedIds={selectedIds}
+            setSelectedIds={setSelectedIds}
+          />
         </div>
       </div>
       <RTable columns={columns} data={products || []} />
+      <TablePagination totalPage={meta?.totalPage} />
     </div>
   );
 };
